@@ -54,6 +54,10 @@ ontology-driven-dev/
 
 样例自带 SQLite 测试数据和默认测试账号，可按 [`code-app-example/README.md`](./code-app-example/README.md) 的说明直接启动和验证完整业务链路。仓库中的 AI API Key 已清空，使用智能助理前需在系统界面中自行配置 OpenAI 兼容的大模型服务。
 
+### 原理讲解演示
+
+[`presentation/index.html`](./presentation/index.html) 是面向研发同事的约 20 分钟技术分享，共 19 页，采用白底蓝色的 16:9 幻灯片形式，可直接离线打开。内容通过销售合同、审批与收款案例串联三阶段管线、七模型、代码实现和运行时 AI，附有逐页讲稿、源码依据和交互模拟。操作与重新构建方式见 [`presentation/README.md`](./presentation/README.md)。
+
 ---
 
 ## 三、安装（主流工具）

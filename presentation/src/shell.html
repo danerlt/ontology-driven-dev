@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="用销售合同案例讲清本体驱动开发：需求探索、七模型、同步联动、工程实现与运行时 AI。">
+  <meta name="theme-color" content="#4361ee">
+  <title>本体驱动开发：原理与工程实践</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234361ee'/%3E%3Cpath d='M18 18L46 18L46 46L18 46Z M18 18L46 46M46 18L18 46' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+  <style>
+@@FONTS@@
+@@BASE@@
+@@STYLES@@
+  </style>
+</head>
+<body>
+  <div class="deck-viewport"><main class="deck-stage" id="deckStage" aria-label="本体驱动开发技术分享">@@SLIDES@@</main></div>
+  <!-- 演示工具位于画布外，保证所有屏幕上的内容比例一致。 -->
+  <nav class="deck-controls" aria-label="演示控制">
+    <button id="previous" aria-label="上一页" title="上一页（←）">@@ICON_LEFT@@</button>
+    <span class="count" id="slideCount">01 / 19</span>
+    <button id="next" aria-label="下一页" title="下一页（→）">@@ICON_RIGHT@@</button>
+    <span class="control-separator"></span>
+    <button id="outlineToggle" aria-label="打开目录" title="目录（O）">目录</button>
+    <button id="notesToggle" aria-label="讲解备注" aria-pressed="false" title="讲稿与来源（N）">讲稿</button>
+    <button id="fullscreenToggle" aria-label="切换全屏" title="全屏（F）">@@ICON_FULL@@</button>
+    <span class="control-separator"></span>
+    <button id="download" aria-label="下载离线 HTML" title="下载 HTML（Ctrl+S）">@@ICON_DOWNLOAD@@</button>
+    <button id="print" aria-label="打印或保存为 PDF" title="打印或保存为 PDF">@@ICON_PRINT@@</button>
+  </nav>
+  <div class="deck-progress" aria-hidden="true"><div id="progressFill"></div></div>
+  <div class="keyboard-help">← → 翻页　N 讲稿　O 目录　F 全屏</div>
+  <div class="edit-hotzone" id="editHotzone" aria-hidden="true"></div>
+  <button class="edit-toggle" id="editToggle" title="编辑文字（E）">编辑文字</button>
+  <div class="edit-notice">编辑中 · 自动保存到本机 · Ctrl+Enter 完成 · Ctrl+S 下载</div>
+  <div class="overlay" id="outline" hidden>
+    <section class="outline-dialog" role="dialog" aria-modal="true" aria-labelledby="outlineTitle">
+      <div class="dialog-header"><h2 id="outlineTitle">分享目录</h2><button class="close-button" id="closeOutline" aria-label="关闭目录">×</button></div>
+      <div class="outline-grid" id="outlineGrid"></div>
+    </section>
+  </div>
+  <aside class="notes-panel" id="notesPanel" hidden aria-label="当前页讲解备注">
+    <div class="dialog-header"><h2 id="notesTitle"></h2><button class="close-button" id="closeNotes" aria-label="关闭讲稿">×</button></div>
+    <h3>讲解提示</h3><div id="notesText"></div>
+    <h3>源码依据</h3><div id="notesSources"></div>
+  </aside>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="screen-reader-only" aria-live="polite" id="liveTitle"></div>
+  <script>@@SCRIPT@@</script>
+</body>
+</html>
