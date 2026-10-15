@@ -23,12 +23,14 @@ def source_url(file):
 def render_slide(data, index):
     sources = [{'label': f'仓库依据：{file}', 'url': source_url(file)} for file in data['sources']]
     attrs = f'data-slide="{index}" data-title="{html.escape(data["title"])}" data-chapter="{data["chapter"]}" data-sources=\'{html.escape(json.dumps(sources, ensure_ascii=False), quote=True)}\''
+    attrs += f' data-topic="{html.escape(data.get("topic", ""))}"'
+    edit_key = data.get('topic') or data.get('edit_key') or str(index)
     body = data['body'].replace('@@REPO@@', REPO_URL).replace('@@FRAMEWORK@@', source_url(FRAMEWORK))
     if data['kind'] == 'cover':
         content = f'<div class="section-label"><span>本体驱动开发 · 原理与工程实践</span><span>2026.10</span></div>{body}'
     else:
-        heading = f'<header><div class="section-label"><span>本体驱动开发 · {data["chapter"]}</span><span>{index:02d} / {len(SLIDES)}</span></div><h2 data-edit="title-{index}" data-check="标题">{data["title"]}</h2>'
-        lead = f'<p class="lead" data-edit="lead-{index}" data-check="引言">{data["lead"]}</p>' if data['lead'] else ''
+        heading = f'<header><div class="section-label"><span>本体驱动开发 · {data["chapter"]}</span><span>{index:02d} / {len(SLIDES)}</span></div><h2 data-edit="title-{edit_key}" data-check="标题">{data["title"]}</h2>'
+        lead = f'<p class="lead" data-edit="lead-{edit_key}" data-check="引言">{data["lead"]}</p>' if data['lead'] else ''
         content = f'{heading}{lead}</header><div class="body" data-check="主体安全区">{body}</div>'
     footer = f'<footer class="foot"><span>{data["footer"]}</span><span class="num">{index:02d} / {len(SLIDES)}</span></footer>'
     notes = f'<aside class="speaker-notes">{html.escape(data["notes"])}</aside>'
@@ -52,9 +54,10 @@ def build():
     parts = {
         'FONTS': font_css,
         'BASE': (source / 'viewport-base.css').read_text(encoding='utf-8'),
-        'STYLES': (source / 'styles.css').read_text(encoding='utf-8'),
+        'STYLES': (source / 'styles.css').read_text(encoding='utf-8') + '\n' + (source/'harness.css').read_text(encoding='utf-8'),
         'SLIDES': '\n'.join(render_slide(data, i + 1) for i, data in enumerate(SLIDES)),
-        'SCRIPT': (source / 'app.js').read_text(encoding='utf-8'),
+        'SCRIPT': (source / 'app.js').read_text(encoding='utf-8') + '\n' + (source/'harness.js').read_text(encoding='utf-8'),
+        'COUNT': str(len(SLIDES)),
         'ICON_LEFT': icon('<path d="m15 6-6 6 6 6"/>'),
         'ICON_RIGHT': icon('<path d="m9 6 6 6-6 6"/>'),
         'ICON_FULL': icon('<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>'),

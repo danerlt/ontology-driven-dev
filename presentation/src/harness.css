@@ -1,0 +1,102 @@
+/* === 沿用白底蓝色体系，补充编排结构与双通道布局 === */
+.harness-structure {
+  display: grid;
+  grid-template-columns: 620px 1fr;
+  gap: 48px;
+  height: 100%;
+}
+.harness-thesis h3 { font-size: 48px; line-height: 1.55; margin-bottom: 28px; }
+.harness-thesis p { font-size: 28px; line-height: 1.9; }
+.harness-thesis p.small { font-size: 25px; }
+.harness-thesis { padding: 30px; }
+.harness-files { align-self: start; font-size: 26px; }
+.harness-files th, .harness-files td { padding: 20px 23px; }
+.harness-files td:first-child { width: 260px; }
+.harness-files code { font-size: 24px; }
+.harness-context { grid-template-columns: 1.18fr .82fr; }
+.harness-context td { font-size: 27px; padding: 25px 22px; }
+.harness-context td:first-child { width: 195px; }
+.harness-memory-title { font-size: 48px; line-height: 1.55; margin-bottom: 32px; }
+.harness-tool-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--pale);
+  border: 1px solid #c2cdfb;
+  border-radius: 10px;
+  padding: 24px 28px;
+  font-size: 25px;
+  color: var(--blue);
+}
+.harness-tool-strip span { color: var(--muted); font-size: 24px; }
+.harness-protocols { height: 405px; margin-top: 28px; }
+.harness-protocols .surface { padding: 20px 34px; }
+.harness-protocols h3 { font-size: 37px; margin: 20px 0; }
+.harness-protocols pre { font-size: 26px; line-height: 1.85; }
+.harness-protocols p { font-size: 27px; line-height: 1.8; margin-top: 25px; color: var(--muted); }
+.harness-boundaries { font-size: 25px; }
+.harness-boundaries th, .harness-boundaries td { padding: 22px 25px; }
+.harness-boundaries th:first-child { width: 150px; }
+.harness-boundaries th:nth-child(2) { width: 710px; }
+.harness-boundary-note {
+  margin-top: 18px;
+  padding: 17px 28px;
+  border-left: 5px solid var(--blue);
+  background: var(--pale);
+  font-size: 25px;
+  line-height: 1.8;
+}
+
+/* === 逐步回放：明确区分模型请求次数和工具执行次数 === */
+.harness-trace {
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: 45px;
+  height: 100%;
+}
+.harness-timeline { display: flex; flex-direction: column; gap: 13px; }
+.harness-step {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 22px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 25px;
+  line-height: 1.6;
+}
+.harness-step span {
+  width: 35px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  color: var(--blue);
+}
+.harness-step.current { background: var(--blue); border-color: var(--blue); color: white; }
+.harness-step.current span { color: white; }
+.harness-step.completed { background: var(--pale); color: var(--ink); }
+.harness-trace-card {
+  position: relative;
+  padding: 30px 34px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 13px;
+}
+.harness-trace-metrics { display: flex; gap: 40px; font-size: 25px; color: var(--muted); }
+.harness-trace-metrics b { color: var(--blue); font-family: var(--font-display); font-size: 36px; }
+#harnessStepTitle { font-size: 36px; line-height: 1.6; margin: 22px 0; }
+#harnessProtocol {
+  background: #edf1fa;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 24px;
+  font-size: 24px;
+  line-height: 1.9;
+  height: 196px;
+  color: var(--blue);
+}
+#harnessExplanation { font-size: 26px; line-height: 1.8; margin-top: 25px; color: var(--muted); }
+.harness-trace-actions { position: absolute; left: 34px; bottom: 30px; display: flex; gap: 16px; }
+.harness-trace-actions button { padding: 14px 21px; font-size: 24px; }

@@ -56,7 +56,7 @@ ontology-driven-dev/
 
 ### 原理讲解演示
 
-[`presentation/index.html`](./presentation/index.html) 是面向研发同事的约 20 分钟技术分享，共 19 页，采用白底蓝色的 16:9 幻灯片形式，可直接离线打开。内容通过销售合同、审批与收款案例串联三阶段管线、七模型、代码实现和运行时 AI，附有逐页讲稿、源码依据和交互模拟。操作与重新构建方式见 [`presentation/README.md`](./presentation/README.md)。
+[`presentation/index.html`](./presentation/index.html) 是面向研发同事的技术分享，共 24 页，采用白底蓝色的 16:9 幻灯片形式，可直接离线打开。主线约 20 分钟，通过销售合同、审批与收款案例串联三阶段管线、七模型、代码实现和运行时 AI；另含 5 页 AI 对话轻量 harness 深讲与逐步调用回放，可额外安排 6～8 分钟。演示附有逐页讲稿、源码依据和交互模拟。操作与重新构建方式见 [`presentation/README.md`](./presentation/README.md)。
 
 ---
 

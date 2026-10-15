@@ -7,9 +7,9 @@ MODELS = 'code-app-example/models/'
 BACKEND = 'code-app-example/backend/'
 
 
-def slide(title, lead, body, notes, sources, chapter='原理', footer='销售合同执行管理案例', kind=''):
+def slide(title, lead, body, notes, sources, chapter='原理', footer='销售合同执行管理案例', kind='', topic=''):
     return dict(title=title, lead=lead, body=body, notes=notes, sources=sources,
-                chapter=chapter, footer=footer, kind=kind)
+                chapter=chapter, footer=footer, kind=kind, topic=topic)
 
 
 SLIDES = [
@@ -31,7 +31,7 @@ SLIDES = [
       '''今天要回答的核心问题是：怎样让 AI 写出来的业务系统，仍然能被人理解、验证和持续维护？
 我们不从 YAML 语法开始，而是从一笔销售合同出发，顺着合同登记、审批、开票、收款，看到需求如何成为模型，模型又怎样约束代码。
 这是一场约二十分钟的研发分享。前半段建立七模型的分工，后半段用真实代码和两个交互示例解释运行机制。按 N 可以看到当前页讲稿和源码依据。''',
-      ['README.md', 'SKILL.md', FRAMEWORK], chapter='开场', footer='约 20 分钟 · 面向研发同事', kind='cover'),
+      ['README.md', 'SKILL.md', FRAMEWORK], chapter='开场', footer='主线约 20 分钟 · AI 深讲可选', kind='cover'),
 
     slide('难点，是让三份答案始终一致', '同一条业务规则，往往同时存在于需求、模型和代码中。', '''
       <div class="drift" data-check="语义漂移对照">
@@ -243,7 +243,7 @@ registry.py 的代码很直白：按 model_type 把对象、行为、规则、�
       <div class="event-strip" data-check="真实 SSE 事件"><code>message_start → tool_call / render_payload → delta → message_end</code></div>
       <p class="source-caption">函数调用循环先执行，最终文本再流式输出。只读 SQL 的权限与资源限制仍需专项加固。</p>''',
       '''运行时 AI 的特点是知道业务语义，也知道真实表结构。prompt.py 将业务背景、注册表中的对象行为规则、实际数据库字段和工具约束组合起来。
-chat.py 先进行最多五轮工具调用，拿到结果后再流式生成最终文本。前端能收到表格、图表和导航动作。本页列出的事件来自当前实现；规范中的 tool_result 事件并未在该样例编排器中单独发出。
+chat.py 先进行最多五轮工具决策，拿到结果后另发一次请求流式生成最终文本。前端能收到表格、图表和导航动作。本页列出的事件来自当前实现；规范中的 tool_result 事件并未在该样例编排器中单独发出。
 工具只提供读取与导航，写操作引导到固定页面。SQL 过滤包含 SELECT 限制、表白名单和缺省 LIMIT，但这不等于完整的行级授权、硬性结果上限或执行超时保障，生产使用仍要专项加固。
 本体上下文能减少语义猜测，最终准确性仍依赖查询结果和权限控制。''',
       [BACKEND+'ai/prompt.py', BACKEND+'ai/chat.py', BACKEND+'ai/tools.py', BACKEND+'sql_readonly/query.py'], chapter='工程'),
@@ -288,3 +288,11 @@ chat.py 先进行最多五轮工具调用，拿到结果后再流式生成最终
 源码链接固定到制作本次演示时的 Git 提交，便于之后回看同一版本。''',
       ['README.md', 'SKILL.md', FRAMEWORK, BACKEND+'services/sync_service.py', BACKEND+'smoke_test.py'], chapter='附录', footer='源码与阅读路径'),
 ]
+
+# 原有标题保留编辑键，插页后不会把本机修改错配到新主题。
+for original_index, original_slide in enumerate(SLIDES, 1):
+    original_slide['edit_key'] = str(original_index)
+
+from harness_content import create_harness_slides
+
+SLIDES[16:16] = create_harness_slides(slide, BACKEND)

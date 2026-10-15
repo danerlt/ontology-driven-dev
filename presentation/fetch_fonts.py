@@ -30,7 +30,7 @@ def download_font(family, filename, characters):
 
 
 def main():
-    files = [ROOT/'src/styles.css', ROOT/'src/app.js', ROOT/'src/shell.html', ROOT/'content.py']
+    files = [ROOT/'content.py', ROOT/'harness_content.py', *sorted((ROOT/'src').glob('*'))]
     raw = ''.join(file.read_text(encoding='utf-8') for file in files)
     raw += ''.join(slide['title'] + slide['lead'] + slide['body'] + slide['notes'] for slide in SLIDES)
     characters = ''.join(c for c in sorted(set(html.unescape(raw))) if c.isprintable() or c == '\u3000')
@@ -40,13 +40,17 @@ def main():
     subsets.append(download_font('Manrope', 'manrope.woff2', ''.join(chr(i) for i in range(32,127))))
     import json
     (ROOT/'fonts/manifest.json').write_text(json.dumps(subsets,ensure_ascii=False,indent=2),encoding='utf-8')
-    licenses = []
-    for folder in ['notosanssc','manrope']:
-        url = f'https://raw.githubusercontent.com/google/fonts/main/ofl/{folder}/OFL.txt'
-        with urlopen(url, timeout=30) as response:
-            licenses.append(folder + '\n' + response.read().decode('utf-8'))
-    (ROOT/'fonts/LICENSES.txt').write_text('\n\n'.join(licenses),encoding='utf-8')
-    print('已保存字体原始许可。')
+    license_file = ROOT/'fonts/LICENSES.txt'
+    if license_file.is_file():
+        print('沿用已保存的同名字体原始许可。')
+    else:
+        licenses = []
+        for folder in ['notosanssc','manrope']:
+            url = f'https://raw.githubusercontent.com/google/fonts/main/ofl/{folder}/OFL.txt'
+            with urlopen(url, timeout=30) as response:
+                licenses.append(folder + '\n' + response.read().decode('utf-8'))
+        license_file.write_text('\n\n'.join(licenses),encoding='utf-8')
+        print('已保存字体原始许可。')
 
 
 if __name__ == '__main__':

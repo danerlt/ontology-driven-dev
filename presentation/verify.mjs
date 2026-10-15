@@ -11,6 +11,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const output = path.join(root, 'artifacts');
 mkdirSync(output, { recursive: true });
 const checks = [];
+const EXPECTED_SLIDES = 24;
 const check = async (name, run) => {
   try { await run(); checks.push({ name, passed: true }); console.log(`通过：${name}`); }
   catch (error) { checks.push({ name, passed: false, error: error.message }); console.error(`失败：${name}；${error.message}`); }
@@ -27,9 +28,10 @@ page.on('request', r => { if (/^https?:/.test(r.url())) requests.push(r.url()); 
 await page.goto(pathToFileURL(htmlPath).href);
 await page.evaluate(() => document.fonts.ready);
 await check('离线打开且不发起外部资源请求', () => assert.equal(requests.length, 0));
-await check('包含十九页完整演示与对应讲解备注', async () => {
-  assert.equal(await page.locator('.slide').count(), 19);
-  assert.equal(await page.locator('.slide aside.speaker-notes').count(), 19);
+await check('包含二十四页演示及五页 AI 编排深讲', async () => {
+  assert.equal(await page.locator('.slide').count(), EXPECTED_SLIDES);
+  assert.equal(await page.locator('.slide aside.speaker-notes').count(), EXPECTED_SLIDES);
+  assert.equal(await page.locator('.slide[data-chapter="AI 深讲"]').count(), 5);
 });
 await check('首尾边界与键盘翻页', async () => {
   await page.keyboard.press('Home'); await page.keyboard.press('ArrowLeft');
@@ -37,7 +39,7 @@ await check('首尾边界与键盘翻页', async () => {
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.locator('.slide.active').getAttribute('data-slide'), '2');
   await page.keyboard.press('End'); await page.keyboard.press('ArrowRight');
-  assert.equal(await page.locator('.slide.active').getAttribute('data-slide'), '19');
+  assert.equal(await page.locator('.slide.active').getAttribute('data-slide'), String(EXPECTED_SLIDES));
 });
 await check('目录能跳转到指定主题并关闭', async () => {
   await page.getByRole('button', { name: '打开目录', exact: true }).click();
@@ -49,6 +51,44 @@ await check('七模型交互展示职责与真实 ID', async () => {
   await page.getByRole('button', { name: 'M3 规则模型', exact: true }).click();
   assert.match(await page.locator('#modelDetail').innerText(), /只判断/);
   assert.match(await page.locator('#modelDetail').innerText(), /RULE-CONTRACT-SETTLEMENT/);
+});
+await check('AI 编排回放区分模型请求与同轮多工具执行', async () => {
+  const topic = page.locator('.slide[data-topic="harness-loop"]');
+  assert.equal(await topic.count(), 1, '缺少 AI 编排回放页');
+  const index = Number(await topic.getAttribute('data-slide')) - 1;
+  await page.evaluate(i => window.deck.showSlide(i), index);
+  assert.equal(await page.locator('#harnessRequestCount').innerText(), '0');
+  for (let i=0;i<3;i++) await page.getByRole('button', { name: '回放下一步', exact: true }).click();
+  assert.equal(await page.locator('#harnessRequestCount').innerText(), '1');
+  assert.equal(await page.locator('#harnessToolCount').innerText(), '2');
+  await page.getByRole('button', { name: '回放下一步', exact: true }).click();
+  assert.equal(await page.locator('#harnessRequestCount').innerText(), '2');
+  assert.match(await page.locator('#harnessExplanation').innerText(), /未追加|不追加/);
+  await page.getByRole('button', { name: '回放下一步', exact: true }).click();
+  assert.equal(await page.locator('#harnessRequestCount').innerText(), '3');
+  assert.match(await page.locator('#harnessProtocol').innerText(), /stream: true/);
+  await page.getByRole('button', { name: '回放下一步', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: '回放下一步', exact: true }).isEnabled(), false);
+  await page.getByRole('button', { name: '重置编排回放', exact: true }).click();
+  assert.equal(await page.locator('#harnessRequestCount').innerText(), '0');
+  assert.equal(await page.locator('#harnessToolCount').innerText(), '0');
+});
+await check('编排回放的全部七个状态均不遮挡操作按钮', async () => {
+  const topic = page.locator('.slide[data-topic="harness-loop"]');
+  assert.equal(await topic.count(), 1, '缺少编排回放主题');
+  const index = Number(await topic.getAttribute('data-slide')) - 1;
+  await page.evaluate(i => window.deck.showSlide(i), index);
+  for (let step=0;step<7;step++) {
+    const layout = await page.locator('#harnessTrace').evaluate(root => {
+      const protocol=root.querySelector('#harnessProtocol');
+      const text=root.querySelector('#harnessExplanation').getBoundingClientRect();
+      const actions=root.querySelector('.harness-trace-actions').getBoundingClientRect();
+      return { protocolFits: protocol.scrollHeight<=protocol.clientHeight+2, textFits: text.bottom<=actions.top-4 };
+    });
+    assert.ok(layout.protocolFits && layout.textFits, `回放步骤 ${step} 存在遮挡`);
+    if (step<6) await page.getByRole('button', { name: '回放下一步', exact: true }).click();
+  }
+  await page.getByRole('button', { name: '重置编排回放', exact: true }).click();
 });
 await check('收款模拟支持结清、冲销恢复、额度拒绝', async () => {
   await page.evaluate(() => window.deck.showSlide(9));
@@ -102,13 +142,19 @@ await check('下载后的 HTML 保留修改且可独立打开', async () => {
   await download.saveAs(downloadedPath);
   const exported = await browser.newPage();
   await exported.goto(pathToFileURL(downloadedPath).href);
-  assert.equal(await exported.locator('.slide').count(), 19);
+  assert.equal(await exported.locator('.slide').count(), EXPECTED_SLIDES);
   assert.equal(await exported.locator('[data-edit="cover-title"]').innerText(), '把业务共识变成系统骨架');
-  assert.equal(await exported.locator('#outlineGrid button').count(), 19);
+  assert.equal(await exported.locator('#outlineGrid button').count(), EXPECTED_SLIDES);
   await exported.getByRole('button', { name: '打开目录', exact: true }).click();
   await exported.locator('#outline button[data-go="5"]').click();
   assert.equal(await exported.locator('.slide.active').getAttribute('data-slide'), '5');
   assert.equal(await exported.locator('#outline').isVisible(), false);
+  const harnessTopic = exported.locator('.slide[data-topic="harness-loop"]');
+  assert.equal(await harnessTopic.count(), 1);
+  await exported.getByRole('button', { name: '打开目录', exact: true }).click();
+  await exported.locator(`#outline button[data-go="${await harnessTopic.getAttribute('data-slide')}"]`).click();
+  await exported.getByRole('button', { name: '回放下一步', exact: true }).click();
+  assert.equal(await exported.locator('#harnessRequestCount').innerText(), '1');
   await exported.close();
   await page.evaluate(() => localStorage.clear()); await page.reload();
 });
@@ -124,12 +170,23 @@ await check('编辑后的标题会同步到目录和讲稿且刷新不丢失', a
   await page.keyboard.press('Escape');
   await page.evaluate(() => localStorage.clear()); await page.reload();
 });
+await check('插入深讲页面后原有标题编辑不会错配到新主题', async () => {
+  await page.evaluate(() => localStorage.setItem('ontology-deck-edits-v1', JSON.stringify({'title-17':'原有的质量校核标题'})));
+  await page.reload();
+  const originalTitle = page.locator('[data-edit="title-17"]');
+  const originalPage = await originalTitle.locator('..').locator('..').getAttribute('data-slide');
+  await page.evaluate(i => window.deck.showSlide(i), Number(originalPage)-1);
+  assert.equal(await originalTitle.innerText(), '原有的质量校核标题');
+  assert.equal(await page.locator('[data-edit="title-17"]').locator('..').locator('..').getAttribute('data-chapter'), '工程');
+  assert.match(await page.locator('.slide[data-topic="harness-structure"] h2').textContent(), /轻量 harness/);
+  await page.evaluate(() => localStorage.clear()); await page.reload();
+});
 const geometry = [];
-await check('桌面与手机上的十九页均保持比例且内容不越界', async () => {
+await check('桌面与手机上的二十四页均保持比例且内容不越界', async () => {
   const issues = [];
   for (const size of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(size);
-    for (let i = 0; i < 19; i++) {
+    for (let i = 0; i < await page.locator('.slide').count(); i++) {
       await page.evaluate(i => window.deck.showSlide(i), i);
       await page.waitForTimeout(40);
       const result = await page.locator('.slide.active').evaluate(slide => {
@@ -153,7 +210,7 @@ await check('桌面与手机上的十九页均保持比例且内容不越界', a
 await check('打印模式显示全部页面', async () => {
   await page.emulateMedia({ media: 'print' });
   const count = await page.locator('.slide').evaluateAll(slides => slides.filter(s => getComputedStyle(s).visibility === 'visible').length);
-  assert.equal(count, 19);
+  assert.equal(count, EXPECTED_SLIDES);
   await page.pdf({ path: path.join(output, 'print-check.pdf'), width: '1920px', height: '1080px', printBackground: true });
 });
 await check('运行过程无 JavaScript 异常', () => assert.deepEqual(errors, []));
